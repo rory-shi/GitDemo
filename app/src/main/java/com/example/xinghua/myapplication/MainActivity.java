@@ -1,5 +1,6 @@
 package com.example.xinghua.myapplication;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -8,13 +9,34 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import de.greenrobot.event.EventBus;
 
 public class MainActivity extends AppCompatActivity {
+    Button btn;
+    TextView tv;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        EventBus.getDefault().register(this);
+
+        btn = (Button) findViewById(R.id.btn_try);
+        tv = (TextView) findViewById(R.id.tv);
+
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this,SecondActivity.class);
+                startActivity(intent);
+            }
+        });
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -26,6 +48,12 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+    }
+
+    public void onEventMainThread(FirstEvent event) {
+        String msg = event.getmMsg();
+        Toast.makeText(this,msg,Toast.LENGTH_LONG).show();
+        tv.setText(msg);
     }
 
     @Override
@@ -49,4 +77,11 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
+    }
 }
+
